@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glossary</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      font-size: 15px;
+      line-height: 1.6;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #666;
+      font-weight: 300;
+      margin-bottom: 1.75rem;
+    }
+
+    /* CONTROLS */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"] {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      padding: 0.4rem 0.75rem;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      outline: none;
+      width: 260px;
+      color: #1a1a1a;
+      background: #fff;
+    }
+    input[type="text"]:focus { border-color: #999; }
+    input[type="text"]::placeholder { color: #aaa; }
+
+    .filter-group {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #999;
+      margin-right: 3px;
+    }
+
+    button {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+      padding: 0.25rem 0.6rem;
+      background: none;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      color: #777;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    button:hover { border-color: #aaa; color: #333; }
+    button.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+    /* ALPHA NAV */
+    .alpha-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin-bottom: 1rem;
+    }
+    .alpha-btn {
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem;
+      padding: 0;
+    }
+    .alpha-btn.no-terms { opacity: 0.3; cursor: default; pointer-events: none; }
+
+    /* META */
+    .result-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.67rem;
+      color: #999;
+      margin-bottom: 0.75rem;
+    }
+    .result-meta strong { color: #555; font-weight: 400; }
+
+    /* TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    thead th {
+      text-align: left;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #999;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 2px solid #e0e0e0;
+      background: #fff;
+      position: sticky;
+      top: 0;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f0f0f0;
+    }
+    tbody tr:hover { background: #fafafa; }
+
+    td {
+      padding: 0.85rem 0.75rem;
+      vertical-align: top;
+    }
+
+    td:first-child {
+      white-space: nowrap;
+      font-weight: 500;
+      color: #1a1a1a;
+      width: 120px;
+    }
+
+    .term-full-name {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: #555;
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    td.definition {
+      color: #444;
+      font-weight: 300;
+      line-height: 1.65;
+    }
+
+    td.region {
+      white-space: nowrap;
+      width: 60px;
+      text-align: right;
+    }
+
+    .tag {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.05em;
+      padding: 0.12rem 0.4rem;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+      margin: 1px 0;
+      white-space: nowrap;
+    }
+    .tag.eu { border-color: #a8c4a8; color: #2a4a2a; background: #eef5ee; }
+    .tag.us { border-color: #a8b8c8; color: #1e3a4a; background: #ebf0f5; }
+
+    mark {
+      background: #d4ebeb;
+      color: #1a1a1a;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 3rem;
+      color: #aaa;
+      font-style: italic;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 1.25rem 1rem 3rem; }
+      input[type="text"] { width: 100%; }
+      td:first-child { width: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Glossary</h1>
+  <p class="subtitle">Clinical trial registration & disclosure — EU/CTIS and US/ClinicalTrials.gov terminology.</p>
+
+  <div class="controls">
+    <input type="text" id="glossary-search" placeholder="Search terms or definitions…" autocomplete="off" spellcheck="false">
+    <div class="filter-group">
+      <span class="filter-label">Region:</span>
+      <button class="active" data-region="all-regions">All</button>
+      <button data-region="EU">EU</button>
+      <button data-region="US">US</button>
+    </div>
+  </div>
+
+  <div class="alpha-nav" id="alpha-nav"></div>
+
+  <div class="result-meta" id="result-meta"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Term</th>
+        <th>Definition</th>
+        <th>Region</th>
+      </tr>
+    </thead>
+    <tbody id="glossary-body"></tbody>
+  </table>
+
+<script>
+const TERMS = [
+  { abbr: "ACT", name: "Applicable Clinical Trial", regions: ["US"], definition: "A clinical trial subject to mandatory ClinicalTrials.gov registration and results reporting under FDAAA 801 / 42 CFR Part 11. For drugs/biologics: an interventional study, phase other than Phase I, of an FDA-regulated product with a US nexus. For devices: a prospective controlled study of health outcomes of an FDA-regulated device with a US nexus, excluding small feasibility studies. See 42 CFR §11.22(b)." },
+  { abbr: "Art. 46 Study", name: "Article 46 Study", regions: ["EU"], definition: "A study sponsored by a Marketing Authorisation Holder (MAH) involving an authorised paediatric medicine. Results must be submitted to the competent authority within 6 months of trial completion. Trials run exclusively outside the EEA use EudraCT Third Country File, not CTIS." },
+  { abbr: "ASR", name: "Annual Safety Report", regions: ["EU"], definition: "A safety report submitted annually via CTIS to the RMS and all MSCs throughout the trial. NOT published. One ASR may cover all IMPs in the trial. Deadline: within 60 days of the data lock date." },
+  { abbr: "CIV", name: "Clinical Investigation Value", regions: ["EU"], definition: "Not a standard CTR/CTIS term — if used internally, clarify context. May refer to the assessed value of a clinical investigation in the CE-marking pathway for medical devices under EU MDR/IVDR." },
+  { abbr: "CSR", name: "Clinical Study Report", regions: ["EU", "US"], definition: "A structured written description of a clinical trial's design, methods, results, and conclusions. Required for EU marketing authorisation applications. Under CTIS, a lay summary of the CSR must be uploaded within 12 months of trial end for trials with EU/EEA sites. Under 42 CFR Part 11 (US), full results — not the CSR itself — are submitted to ClinicalTrials.gov." },
+  { abbr: "CT.gov", name: "ClinicalTrials.gov", regions: ["US"], definition: "The US federal registry and results database for clinical trials, maintained by the National Library of Medicine (NLM). Mandatory registration and results submission governed by FDAAA 801 and 42 CFR Part 11. Also a WHO ICTRP primary registry, satisfying ICMJE registration requirements." },
+  { abbr: "CTIS", name: "Clinical Trials Information System", regions: ["EU"], definition: "The EU-wide portal for clinical trial applications, authorisations, and transparency disclosures, replacing EudraCT for trials governed by Regulation (EU) No 536/2014. Full transition completed 31 January 2025. CTIS serves as both the regulatory submission portal and the public transparency database." },
+  { abbr: "CTR", name: "Clinical Trials Regulation", regions: ["EU"], definition: "Regulation (EU) No 536/2014, which replaced the Clinical Trials Directive (2001/20/EC). Governs clinical trials on medicinal products conducted in the EU/EEA. Operationalised through CTIS. Applicable from 31 January 2022; all new trials must use CTIS; all legacy trials transitioned by 31 January 2025." },
+  { abbr: "DSMB", name: "Data Safety Monitoring Board", regions: ["EU", "US"], definition: "An independent committee that periodically reviews unblinded safety and efficacy data during a trial. May recommend early stopping for safety, futility, or overwhelming efficacy. Required by some regulators and sponsors for phase III trials. Also called Data Monitoring Committee (DMC)." },
+  { abbr: "EudraCT", name: "European Union Drug Regulating Authorities Clinical Trials", regions: ["EU"], definition: "The predecessor EU clinical trials registry, now superseded by CTIS for trials under CTR. EudraCT Third Country File remains applicable for trials conducted exclusively outside the EEA but involving an IMP developed in the EU context (e.g., Art. 46, PIP trials outside EEA)." },
+  { abbr: "FDAAA 801", name: "Food and Drug Administration Amendments Act Section 801", regions: ["US"], definition: "US federal law (Public Law 110-85, enacted 2007) that established mandatory clinical trial registration and results reporting requirements at ClinicalTrials.gov. Implemented via 42 CFR Part 11. Penalties for non-compliance include civil monetary penalties up to $10,000/day and withholding of NIH grant funding." },
+  { abbr: "IB", name: "Investigator's Brochure", regions: ["EU", "US"], definition: "A clinical and non-clinical data compilation on the IMP relevant to its investigation in human subjects. Required document in both EU and US trial submissions. Under CTIS, the IB must be uploaded in a not-for-publication slot — never in a public-facing slot. Do not upload into the SmPC placeholder." },
+  { abbr: "ICMJE", name: "International Committee of Medical Journal Editors", regions: ["EU", "US"], definition: "A group of medical journal editors whose Uniform Requirements mandate prospective trial registration as a condition of publication. Registration must occur before first participant enrolment. CT.gov and CTIS are both recognised ICMJE registries." },
+  { abbr: "IMP", name: "Investigational Medicinal Product", regions: ["EU"], definition: "The active substance or placebo being tested or used as a reference in a clinical trial. Under the CTR and CTIS, the IMP is a core data element. Distinct from Non-Investigational Medicinal Products (NIMPs) such as rescue medication or background therapy." },
+  { abbr: "IND", name: "Investigational New Drug Application", regions: ["US"], definition: "A US regulatory submission to FDA permitting a sponsor to ship and administer an unapproved drug in interstate commerce for clinical investigation purposes. An active IND is required before initiating most Phase I–III US clinical trials. FDA has 30 days to place a clinical hold; absence of a hold = implicit approval to proceed." },
+  { abbr: "LAY SUMMARY", name: "Lay Summary", regions: ["EU"], definition: "A plain-language description of clinical trial results required under the CTR. Must be uploaded to CTIS within 12 months of trial end (for trials involving minors: within 6 months). Must be understandable to a lay audience. A separate summary for healthcare professionals may also be required. Failure to upload on time is a reportable non-compliance." },
+  { abbr: "LLT", name: "Lowest Level Term", regions: ["EU", "US"], definition: "The most specific level of MedDRA coding hierarchy, used in adverse event coding for regulatory submissions including ClinicalTrials.gov results reporting and CTIS safety narratives." },
+  { abbr: "MAH", name: "Marketing Authorisation Holder", regions: ["EU"], definition: "The company or individual holding the marketing authorisation for a medicinal product in the EU/EEA. The MAH may be the sponsor of post-authorisation studies and is responsible for Art. 46 submissions." },
+  { abbr: "MedDRA", name: "Medical Dictionary for Regulatory Activities", regions: ["EU", "US"], definition: "The internationally recognised medical terminology standard used for coding adverse events, medical history, and indications in regulatory submissions. Required for ClinicalTrials.gov results reporting and CTIS safety data." },
+  { abbr: "MSC", name: "Member State Concerned", regions: ["EU"], definition: "An EU/EEA member state in which a sponsor has requested authorisation to conduct a clinical trial under CTIS. Each MSC conducts a Part II assessment (ethics, national requirements). Part I is assessed collectively under the lead of the RMS." },
+  { abbr: "NIMP", name: "Non-Investigational Medicinal Product", regions: ["EU"], definition: "A medicinal product used in a clinical trial but not as the IMP — e.g., background therapy, rescue medication, or a challenge agent. NIMPs must be listed in the trial protocol and CTIS application but are not subject to the same regulatory scrutiny as IMPs." },
+  { abbr: "NLM", name: "National Library of Medicine", regions: ["US"], definition: "The US federal agency responsible for maintaining ClinicalTrials.gov. NLM conducts Quality Control (QC) review of submitted records and issues queries to responsible parties. QC review typically occurs within 30 days of submission." },
+  { abbr: "PEI", name: "Paul-Ehrlich-Institut", regions: ["EU"], definition: "The German federal authority responsible for vaccines and biomedicines, acting as competent authority for clinical trial applications involving such products in Germany within CTIS." },
+  { abbr: "PIP", name: "Paediatric Investigation Plan", regions: ["EU"], definition: "An EMA-agreed plan for developing a medicine in children. Required for new marketing authorisation applications. For trials with EU/EEA sites: register in CTIS and attach PDCO opinion. For trials exclusively outside the EEA: register in EudraCT Third Country File, not CTIS." },
+  { abbr: "RFI", name: "Request for Information", regions: ["EU"], definition: "A formal question raised by the RMS or an MSC during CTIS validation or assessment. Strict response deadlines: validation RFI = 10 days; assessment RFI = 12 days. Non-response causes the application to lapse automatically. CTIS sends no email alerts — the portal must be checked daily." },
+  { abbr: "RMS", name: "Reference Member State", regions: ["EU"], definition: "The lead Member State responsible for coordinating and concluding the Part I assessment in a multinational CTIS submission. Sponsor proposes the RMS; for single-nation trials the sole MS is RMS by default." },
+  { abbr: "Responsible Party", name: "Responsible Party", regions: ["US"], definition: "The entity or individual legally accountable for ClinicalTrials.gov registration and results submissions under 42 CFR Part 11. May be the sponsor of the clinical trial, the sponsor-investigator, or a principal investigator designated by the sponsor who has access and control over all trial data. The responsible party's official title must be submitted as a required data element at registration." },
+  { abbr: "SM", name: "Substantial Modification", regions: ["EU"], definition: "A change to a clinical trial that significantly impacts participant safety, scientific validity, or data reliability. Requires formal CTIS authorisation. Protocol amendments submitted as part of an SM must include a clean version (for publication) and a track-changes version for MSC review — the track-changes version must only be uploaded to the not-for-publication slot, never to a public-facing slot." },
+  { abbr: "SmPC", name: "Summary of Medicinal Product Characteristics", regions: ["EU"], definition: "The approved product information document for an authorised medicine. Published in CTIS for Category 2 and 3 trials on authorisation decision. Two versions required: unredacted and redacted. May substitute for the IB in low-intervention trials. Do not upload the IB into the SmPC placeholder — it will publish automatically." },
+  { abbr: "SUSAR", name: "Suspected Unexpected Serious Adverse Reaction", regions: ["EU"], definition: "An unexpected serious adverse reaction suspected to be related to the IMP. Reported via EudraVigilance (EU) ONLY — never via CTIS. Timelines: 7 days for fatal/life-threatening; 15 days for all other." },
+  { abbr: "USM", name: "Urgent Safety Measure", regions: ["EU"], definition: "An immediate action taken by the sponsor to protect trial participants from an unexpected serious risk. Must be notified via CTIS immediately, followed by a Substantial Modification submission within 15 days." },
+  { abbr: "WHO ICTRP", name: "WHO International Clinical Trials Registry Platform", regions: ["EU", "US"], definition: "The WHO platform recognising qualified primary registries that meet specific criteria for transparency and public access. CT.gov and CTIS are both recognised WHO ICTRP primary registries and satisfy the ICMJE registration requirement." },
+  { abbr: "Voluntary Registration", name: "Voluntary Registration", regions: ["US"], definition: "Registration of a clinical trial in ClinicalTrials.gov where mandatory ACT requirements under 42 CFR Part 11 do not apply — for example, Phase I drug trials, observational studies, or expanded access protocols. Permitted under 42 CFR §11.60. May be appropriate for transparency purposes or where ICMJE journal publication is planned, as ICMJE requires prospective registration before first participant enrolment as a condition of publication." }
+];
+
+TERMS.sort((a, b) => a.abbr.localeCompare(b.abbr));
+
+let activeRegion = 'all-regions';
+let activeLetter = null;
+let searchQuery = '';
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function highlight(text, query) {
+  if (!query) return escHtml(text);
+  const escaped = escHtml(text);
+  const q = escHtml(query);
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return escaped.replace(re, '<mark>$1</mark>');
+}
+
+function matchesFilters(term) {
+  if (activeRegion !== 'all-regions' && !term.regions.includes(activeRegion)) return false;
+  if (activeLetter && term.abbr[0].toUpperCase() !== activeLetter) return false;
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    return term.abbr.toLowerCase().includes(q) || term.name.toLowerCase().includes(q) || term.definition.toLowerCase().includes(q);
+  }
+  return true;
+}
+
+function buildAlphaNav() {
+  const nav = document.getElementById('alpha-nav');
+  const presentLetters = [...new Set(TERMS.map(t => t.abbr[0].toUpperCase()))].sort();
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  nav.innerHTML = letters.map(l => {
+    const has = presentLetters.includes(l);
+    return `<button class="alpha-btn ${has ? 'has-terms' : 'no-terms'}" data-letter="${l}">${l}</button>`;
+  }).join('');
+  nav.querySelectorAll('.has-terms').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const l = btn.dataset.letter;
+      if (activeLetter === l) {
+        activeLetter = null;
+        btn.classList.remove('active');
+      } else {
+        activeLetter = l;
+        nav.querySelectorAll('.alpha-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+      searchQuery = '';
+      document.getElementById('glossary-search').value = '';
+      render();
+    });
+  });
+}
+
+function render() {
+  const filtered = TERMS.filter(matchesFilters);
+  const tbody = document.getElementById('glossary-body');
+  const meta = document.getElementById('result-meta');
+  meta.innerHTML = `Showing <strong>${filtered.length}</strong> of ${TERMS.length} terms`;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" class="no-results">No terms match your search.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(term => {
+    const tags = term.regions.map(r => `<span class="tag ${r.toLowerCase()}">${r}</span>`).join(' ');
+    const fullName = term.name !== term.abbr ? `<span class="term-full-name">${highlight(term.name, searchQuery)}</span>` : '';
+    return `<tr>
+      <td>${highlight(term.abbr, searchQuery)}${fullName}</td>
+      <td class="definition">${highlight(term.definition, searchQuery)}</td>
+      <td class="region">${tags}</td>
+    </tr>`;
+  }).join('');
+}
+
+buildAlphaNav();
+render();
+
+document.getElementById('glossary-search').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  activeLetter = null;
+  document.querySelectorAll('.alpha-btn').forEach(b => b.classList.remove('active'));
+  render();
+});
+
+document.querySelectorAll('[data-region]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeRegion = btn.dataset.region;
+    document.querySelectorAll('[data-region]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+});
+</script>
+</body>
+</html>
