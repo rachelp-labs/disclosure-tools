@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Requirements at a Glance</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      font-size: 15px;
+      line-height: 1.6;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #1a1a1a;
+      font-weight: 300;
+      margin-bottom: 2rem;
+    }
+
+    /* TWO-COLUMN GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    /* CARD */
+    .card {
+      border: 1px solid #e8e3d9;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1rem 1.25rem 0.75rem;
+      border-bottom: 1px solid #e8e3d9;
+    }
+
+    .card-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      font-weight: 400;
+    }
+
+    .card-body {
+      padding: 1rem 1.25rem 1.25rem;
+    }
+
+    /* SECTION HEADING within card */
+    .section-head {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.63rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      margin: 1.1rem 0 0.5rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid #f0ede7;
+    }
+    .section-head:first-child { margin-top: 0; }
+
+    /* ROW */
+    .row {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 0.5rem 0.75rem;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.82rem;
+    }
+    .row:last-child { border-bottom: none; }
+
+    .label {
+      color: #1a1a1a;
+      font-weight: 400;
+      font-size: 0.8rem;
+      padding-top: 1px;
+    }
+
+    .value {
+      color: #1a1a1a;
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    sup {
+      font-size: 0.58rem;
+      color: #1a1a1a;
+      margin-left: 1px;
+    }
+
+    /* FOOTNOTE STRIP */
+    .footnotes {
+      background: #f7f7f7;
+      border-top: 1px solid #e8e3d9;
+      padding: 0.6rem 1.25rem 0.75rem;
+      font-size: 0.7rem;
+      color: #1a1a1a;
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #1a1a1a;
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; gap: 0.15rem; }
+      .label { color: #1a1a1a; font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Requirements at a glance</h1>
+  <p class="subtitle">Clinical trial registration & disclosure — EU/CTIS and US/ClinicalTrials.gov.</p>
+
+  <div class="grid">
+
+    <!-- EU CARD -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">EU / EEA — CTIS</div>
+      </div>
+      <div class="card-body">
+
+        <div class="section-head">Registration</div>
+        <div class="row">
+          <span class="label">Regulation</span>
+          <span class="value">Regulation (EU) No 536/2014 (CTR)</span>
+        </div>
+        <div class="row">
+          <span class="label">Deadline</span>
+          <span class="value">CTA must be submitted and authorised before trial start<sup>1</sup></span>
+        </div>
+        <div class="row">
+          <span class="label">Categories</span>
+          <span class="value">Cat. 1: Phase I · Cat. 2: Phase I/II integrated, Phase II, Phase III · Cat. 3: Phase III–IV integrated, Phase IV, low-interventional<sup>2</sup></span>
+        </div>
+
+        <div class="section-head">Results posting</div>
+        <div class="row">
+          <span class="label">Summary of results</span>
+          <span class="value">Within 12 months from end of trial in all Member States concerned<sup>3</sup></span>
+        </div>
+        <div class="row">
+          <span class="label">Lay summary</span>
+          <span class="value">12 months from end of trial; 6 months for paediatric trials and/or trials in a PIP context<sup>4</sup></span>
+        </div>
+        <div class="row">
+          <span class="label">CSR</span>
+          <span class="value">When intended to support an MAA, due within 30 days after the MA is granted, the procedure is completed, or the MAA is withdrawn<sup>5</sup></span>
+        </div>
+
+        <div class="section-head">Request for Information</div>
+        <div class="row">
+          <span class="label">RFI response</span>
+          <span class="value">Up to 10 days (validation); up to 12 days (assessment)<sup>6</sup></span>
+        </div>
+
+        <div class="section-head">Transparency / public disclosure<sup>7</sup></div>
+        <div class="row">
+          <span class="label">Cat. 1</span>
+          <span class="value">Protocol, synopsis, patient-facing documents publish 30 months after end of trial</span>
+        </div>
+        <div class="row">
+          <span class="label">Cat. 1 paediatric / PIP</span>
+          <span class="value">Protocol, synopsis, patient-facing documents publish with final summary results when submitted in CTIS</span>
+        </div>
+        <div class="row">
+          <span class="label">Cat. 2 &amp; 3</span>
+          <span class="value">Protocol, synopsis, patient-facing documents, SmPC, ICF/PIS publish on first MSC decision on the CTA</span>
+        </div>
+
+        <div class="section-head">Key watchouts</div>
+        <div class="row">
+          <span class="label">Grandfathered trials</span>
+          <span class="value">Trials authorised under EudraCT before the transition deadline remain on EudraCT only<sup>8</sup></span>
+        </div>
+        <div class="row">
+          <span class="label">PIP / Art. 46</span>
+          <span class="value">PIP trials with EU/EEA sites: register in CTIS and attach PDCO opinion. PIP/Art. 46 trials exclusively outside EEA: register in EudraCT Third Country File — not CTIS<sup>9</sup></span>
+        </div>
+
+      </div>
+      <div class="footnotes">
+        <sup>1</sup> EU CTR Art. 4 &amp; 5. &nbsp;
+        <sup>2</sup> EU CTR Art. 2(4), Annex I. &nbsp;
+        <sup>3</sup> EU CTR Art. 37(2). &nbsp;
+        <sup>4</sup> EU CTR Art. 37(3). &nbsp;
+        <sup>5</sup> EU CTR Art. 37(4). &nbsp;
+        <sup>6</sup> EU CTR Art. 6 &amp; 7. CTIS does not send automatic RFI notifications — monitor Notices &amp; alerts in the sponsor workspace. &nbsp;
+        <sup>7</sup> EU CTR Art. 25; Revised CTIS Transparency Rules. &nbsp;
+        <sup>8</sup> EU CTR Art. 98. &nbsp;
+        <sup>9</sup> EU CTR Art. 26; Reg. (EC) No 1901/2006.
+      </div>
+    </div>
+
+    <!-- US CARD -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">US — ClinicalTrials.gov</div>
+      </div>
+      <div class="card-body">
+
+        <div class="section-head">Registration</div>
+        <div class="row">
+          <span class="label">Regulation</span>
+          <span class="value">FDAAA 801 · 42 CFR Part 11 · NIH Policy (NIH-funded trials)</span>
+        </div>
+        <div class="row">
+          <span class="label">ACT definition</span>
+          <span class="value">FDA-regulated interventional, all phases other than Phase I, full criteria on ACT Checklist<sup>1</sup></span>
+        </div>
+        <div class="row">
+          <span class="label">Deadline</span>
+          <span class="value">Within 21 days after first participant enrolment<sup>2</sup></span>
+        </div>
+        <div class="row">
+          <span class="label">Phase I</span>
+          <span class="value">Generally excluded from mandatory ACT registration for drugs/biologics; voluntary registration may still be used for transparency or ICMJE publication purposes</span>
+        </div>
+        <div class="row">
+          <span class="label">NIH-funded</span>
+          <span class="value">Mandatory registration regardless of ACT status — no later than 21 days after first participant enrolment<sup>3</sup></span>
+        </div>
+
+        <div class="section-head">Results posting</div>
+        <div class="row">
+          <span class="label">Results deadline</span>
+          <span class="value">Within 12 months of PCD, unless a permitted delay or certification applies<sup>4</sup></span>
+        </div>
+        <div class="row">
+          <span class="label">PCD defined as</span>
+          <span class="value">Date the final participant was examined or received an intervention for final collection of data for the primary outcome</span>
+        </div>
+        <div class="row">
+          <span class="label">AE table</span>
+          <span class="value">Required as part of results information<sup>5</sup></span>
+        </div>
+        <div class="row">
+          <span class="label">Protocol / SAP</span>
+          <span class="value">Protocol and statistical analysis plan must be submitted with results information for ACT results submissions<sup>5</sup></span>
+        </div>
+        <div class="row">
+          <span class="label">NIH-funded results</span>
+          <span class="value">Summary results due within 12 months of PCD<sup>3</sup></span>
+        </div>
+
+        <div class="section-head">Key watchouts</div>
+        <div class="row">
+          <span class="label">Common Rule / ICF</span>
+          <span class="value">Federally conducted or supported trials may require public posting of one IRB-approved informed consent form under the revised Common Rule</span>
+        </div>
+
+      </div>
+      <div class="footnotes">
+        <sup>1</sup> 42 CFR §11.10; <a href="https://cdn.clinicaltrials.gov/documents/ACT_Checklist.pdf" target="_blank">ACT Checklist</a>. &nbsp;
+        <sup>2</sup> 42 CFR §11.24. &nbsp;
+        <sup>3</sup> NIH Policy NOT-OD-16-149. &nbsp;
+        <sup>4</sup> 42 CFR §11.44. &nbsp;
+        <sup>5</sup> 42 CFR §11.48.
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
