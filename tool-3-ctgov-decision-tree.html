@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool 3 — ClinicalTrials.gov Decision Tree</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #fff; color: #1a1a1a; font-size: 15px; line-height: 1.6; padding: 2.5rem 2rem 4rem; }
+    h1 { font-size: 1.4rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .subtitle { font-size: 0.85rem; color: #666; font-weight: 300; margin-bottom: 2rem; }
+    .tool-card { border: 1px solid #e8e3d9; border-radius: 10px; overflow: hidden; }
+    .tree-container { padding: 2rem; }
+    .tree-step { display: none; animation: fadeIn 0.25s ease; }
+    .tree-step.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .step-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
+    .step-num { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; color: #999; background: #f5f5f5; padding: 0.3rem 0.55rem; border-radius: 4px; white-space: nowrap; margin-top: 0.2rem; flex-shrink: 0; }
+    .step-question { font-size: 1.1rem; font-weight: 500; color: #1a1a1a; line-height: 1.3; }
+    .step-question small { display: block; font-size: 0.82rem; font-weight: 300; color: #666; margin-top: 0.3rem; }
+    .choices { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.5rem; }
+    .choice-btn { display: flex; align-items: flex-start; background: #faf9f7; border: 1px solid #e8e3d9; border-radius: 8px; padding: 0.85rem 1rem; cursor: pointer; text-align: left; transition: all 0.18s; font-family: 'DM Sans', sans-serif; }
+    .choice-btn:hover { background: #f0ede7; border-color: #ccc; transform: translateX(2px); }
+    .choice-text { flex: 1; }
+    .choice-label { font-size: 0.88rem; font-weight: 500; color: #1a1a1a; display: block; margin-bottom: 0.15rem; }
+    .choice-desc { font-size: 0.8rem; font-weight: 300; color: #777; line-height: 1.5; }
+    .result-box { border-radius: 8px; padding: 1.1rem 1.25rem; margin-bottom: 1rem; border-left: 3px solid #ccc; background: #f9f8f6; }
+    .result-box.green { border-left-color: #a8c4a8; }
+    .result-box.amber { border-left-color: #d4aa70; }
+    .result-box.red { border-left-color: #c4848a; }
+    .result-title { font-weight: 500; font-size: 0.88rem; margin-bottom: 0.4rem; color: #1a1a1a; }
+    .result-body { font-size: 0.83rem; font-weight: 300; color: #444; line-height: 1.65; }
+    .result-body strong { font-weight: 500; color: #1a1a1a; }
+    .result-body ul { padding-left: 1.2rem; margin-top: 0.4rem; }
+    .result-body ul li { margin-bottom: 0.2rem; }
+    .ref-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+    .ref-chip { font-family: 'DM Mono', monospace; font-size: 0.67rem; background: #f5f5f5; color: #555; border: 1px solid #ddd; padding: 0.18rem 0.55rem; border-radius: 20px; }
+    .progress-track { display: flex; gap: 0.3rem; margin-bottom: 1.75rem; }
+    .progress-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; }
+    .progress-dot.done { background: #aaa; }
+    .progress-dot.current { background: #1a1a1a; width: 18px; border-radius: 3px; }
+    .breadcrumb { font-size: 0.78rem; color: #999; margin-bottom: 1.25rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; }
+    .breadcrumb span { color: #555; }
+    .breadcrumb .sep { color: #ccc; }
+    .outcome-header { margin-bottom: 1.25rem; }
+    .outcome-badge { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.25rem 0.7rem; border-radius: 20px; background: #f5f5f5; color: #555; border: 1px solid #ddd; }
+    .tree-nav { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+    .btn-back, .btn-reset { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; padding: 0.45rem 1rem; border-radius: 8px; cursor: pointer; border: 1px solid #ddd; background: transparent; color: #777; transition: all 0.18s; }
+    .btn-back:hover, .btn-reset:hover { background: #f5f5f5; color: #333; }
+  </style>
+</head>
+<body>
+  <h1>ClinicalTrials.gov Decision Tree</h1>
+  <p class="subtitle">Determine registration and results submission obligations for US-based or FDA-regulated trials under FDAAA 801 / 42 CFR Part 11.</p>
+
+  <div class="tool-card"><div class="tree-container" id="ctgov-tree-container">
+
+    <div class="tree-step active" id="ctgov-s0">
+      <div class="progress-track"><div class="progress-dot current"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+      <div class="step-header"><span class="step-num">Step 1</span><div class="step-question">Is this an Applicable Clinical Trial (ACT)?<small><strong>ACT criteria (all must apply)</strong><br>Under FDAAA 801 / 42 CFR Part 11, a study is generally an ACT if:<br>· It is a clinical investigation of a drug, biologic, or device subject to FDA regulation<br>· It has the required US/FDA nexus (one or more US sites, or study under FDA IND/IDE)<br>· For drugs/biologics: interventional study, phase other than Phase I<br>· For devices: prospective controlled study of health outcomes, excluding small feasibility studies</small></div></div>
+      <div class="choices">
+        <button class="choice-btn" onclick="ctgovGo('s1-act-yes')"><span class="choice-text"><span class="choice-label">Yes — Trial qualifies as an ACT</span><span class="choice-desc">Mandatory registration and results reporting apply.</span></span></button>
+        <button class="choice-btn" onclick="ctgovGo('s1-phase1')"><span class="choice-text"><span class="choice-label">No — Trial does not qualify as an ACT</span><span class="choice-desc">Phase I · Observational · Expanded Access</span></span></button>
+      </div>
+    </div>
+
+    <div class="tree-step" id="ctgov-s1-act-yes">
+      <div class="progress-track"><div class="progress-dot done"></div><div class="progress-dot current"></div><div class="progress-dot"></div></div>
+      <div class="breadcrumb"><span>ACT</span></div>
+      <div class="step-header"><span class="step-num">Step 2</span><div class="step-question">Select the stage</div></div>
+      <div class="choices">
+        <button class="choice-btn" onclick="ctgovGo('s2-act-register')"><span class="choice-text"><span class="choice-label">Registration</span><span class="choice-desc">Timing, required data fields, IND linkage.</span></span></button>
+        <button class="choice-btn" onclick="ctgovGo('s2-act-results')"><span class="choice-text"><span class="choice-label">Results Submission</span><span class="choice-desc">Deadlines, PCD definition, adverse events, protocol/SAP.</span></span></button>
+      </div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctgovBack('s0')">← Back</button><button class="btn-reset" onclick="ctgovReset()">↺ Start over</button></div>
+    </div>
+
+    <div class="tree-step" id="ctgov-s2-act-register">
+      <div class="breadcrumb"><span>ACT</span><span class="sep">›</span><span>Registration</span></div>
+      <div class="outcome-header"><span class="outcome-badge">Registration — ACT</span></div>
+      <div class="result-box green"><div class="result-title">Registration Deadline</div><div class="result-body"><strong>Within 21 days after first participant enrolment</strong> — not first patient screened.</div></div>
+      <div class="result-box neutral"><div class="result-title">Required Data Fields</div><div class="result-body"><ul><li><strong>Descriptive:</strong> brief title, brief summary, study design, study phase, primary disease/condition, intervention name(s) and type, primary and secondary outcome measure information, study start date, primary completion date</li><li><strong>Recruitment:</strong> eligibility criteria, sex/gender, age limits, accepts healthy volunteers, overall recruitment status</li><li><strong>Location and contact:</strong> name of sponsor, responsible party by official title, facility information</li><li><strong>Administrative:</strong> unique protocol identification number, IND or IDE number, IRB status, responsible party contact information</li></ul></div></div>
+      <div class="ref-chips"><span class="ref-chip">42 CFR §11.24</span><span class="ref-chip">42 CFR §11.28</span><span class="ref-chip">42 CFR §11.22(b) ACT Checklist</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctgovBack('s1-act-yes')">← Back</button><button class="btn-reset" onclick="ctgovReset()">↺ Start over</button></div>
+    </div>
+
+    <div class="tree-step" id="ctgov-s2-act-results">
+      <div class="breadcrumb"><span>ACT</span><span class="sep">›</span><span>Results Submission</span></div>
+      <div class="outcome-header"><span class="outcome-badge">Results — ACT</span></div>
+      <div class="result-box green"><div class="result-title">Results Deadline</div><div class="result-body"><strong>Within 12 months of the PCD</strong>, unless a permitted delay or certification applies.<br>PCD = the date the final participant was examined or received an intervention for final collection of data for the primary outcome.</div></div>
+      <div class="result-box neutral"><div class="result-title">Required Results Information</div><div class="result-body">All submitted via the CT.gov results module:<ul><li><strong>Participant flow:</strong> progress of participants through the trial by arm, including numbers who started and completed</li><li><strong>Demographics and baseline characteristics:</strong> by arm or comparison group and overall</li><li><strong>Outcomes and statistical analyses:</strong> primary and secondary outcome measure data by arm, including results of statistical analyses</li><li><strong>Adverse events:</strong> required AE table</li><li><strong>Protocol:</strong> full protocol in a common electronic format</li><li><strong>Statistical analysis plan:</strong> if separate from the protocol</li><li><strong>Administrative:</strong> results point of contact, certain agreements between principal investigator and sponsor</li></ul></div></div>
+      <div class="result-box red"><div class="result-title">Common PCD Mistake</div><div class="result-body">PCD is the date the final participant is examined or receives an intervention for the PRIMARY outcome — not last visit, not database lock.</div></div>
+      <div class="ref-chips"><span class="ref-chip">42 CFR §11.44</span><span class="ref-chip">42 CFR §11.48</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctgovBack('s1-act-yes')">← Back</button><button class="btn-reset" onclick="ctgovReset()">↺ Start over</button></div>
+    </div>
+
+    <div class="tree-step" id="ctgov-s1-phase1">
+      <div class="breadcrumb"><span>Not ACT</span></div>
+      <div class="outcome-header"><span class="outcome-badge">Not ACT — Generally Excluded</span></div>
+      <div class="result-box amber"><div class="result-title">What This Means</div><div class="result-body">Mandatory registration and results reporting under 42 CFR Part 11 do not apply. Expanded access use is expressly excluded from the definition of an applicable clinical trial under 42 CFR §11.10.</div></div>
+      <div class="result-box neutral"><div class="result-title">Studies Generally Excluded</div><div class="result-body"><ul><li>Phase I drug trials</li><li>Observational studies</li><li>Expanded access protocols</li></ul></div></div>
+      <div class="result-box neutral"><div class="result-title">Additional Considerations</div><div class="result-body"><ul><li><strong>Voluntary registration:</strong> permitted under 42 CFR §11.60 — may be appropriate for transparency purposes</li><li><strong>ICMJE:</strong> if journal publication is planned, confirm whether prospective registration before first enrolment was required</li><li><strong>Device edge cases:</strong> confirm whether the study meets the device feasibility exclusion under 42 CFR §11.22(b)</li></ul></div></div>
+      <div class="result-box green"><div class="result-title">NIH-funded? Different rules apply</div><div class="result-body">NIH-funded clinical trials must register and post results in CT.gov <strong>regardless of ACT status</strong>.<br><br><strong>Registration:</strong> no later than 21 days after first participant enrolment.<br><strong>Results:</strong> within 12 months of PCD.<br><strong>Protocol upload:</strong> required.<br><br>For ACTs that are also NIH-funded, 42 CFR Part 11 protocol and SAP submission requirements also apply.</div></div>
+      <div class="ref-chips"><span class="ref-chip">42 CFR §11.10</span><span class="ref-chip">42 CFR §11.22(b)</span><span class="ref-chip">42 CFR §11.60</span><span class="ref-chip">NIH Policy NOT-OD-16-149</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctgovBack('s0')">← Back</button><button class="btn-reset" onclick="ctgovReset()">↺ Start over</button></div>
+    </div>
+
+  </div></div>
+
+<script>
+  let ctgovHistory = [];
+  function ctgovGo(stepId) {
+    const current = document.querySelector('#ctgov-tree-container .tree-step.active');
+    if (current) { ctgovHistory.push(current.id.replace('ctgov-','')); current.classList.remove('active'); }
+    document.getElementById('ctgov-' + stepId).classList.add('active');
+  }
+  function ctgovBack(stepId) {
+    const current = document.querySelector('#ctgov-tree-container .tree-step.active');
+    if (current) current.classList.remove('active');
+    document.getElementById('ctgov-' + stepId).classList.add('active');
+  }
+  function ctgovReset() {
+    document.querySelectorAll('#ctgov-tree-container .tree-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('ctgov-s0').classList.add('active');
+    ctgovHistory = [];
+  }
+</script>
+</body>
+</html>

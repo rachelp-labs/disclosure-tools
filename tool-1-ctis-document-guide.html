@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool 1 — CTIS Document Reference Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #fff; color: #1a1a1a; font-size: 15px; line-height: 1.6; padding: 2.5rem 2rem 4rem; }
+    h1 { font-size: 1.4rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .subtitle { font-size: 0.85rem; color: #666; font-weight: 300; margin-bottom: 2rem; }
+
+    /* FILTERS */
+    .doc-ref-filters { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.75rem; align-items: center; }
+    .filter-group { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+    .filter-group-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: #999; margin-right: 0.25rem; }
+    .filter-btn { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.75rem; border-radius: 20px; border: 1px solid #ccc; background: transparent; color: #555; cursor: pointer; transition: all 0.15s; }
+    .filter-btn:hover { background: #f5f5f5; color: #1a1a1a; }
+    .filter-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+    .filter-divider { width: 1px; height: 20px; background: #ddd; margin: 0 0.4rem; }
+
+    .doc-results-count { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #999; margin-bottom: 1.25rem; letter-spacing: 0.04em; }
+    #doc-empty-state { text-align: center; padding: 2.5rem 1rem; color: #aaa; font-size: 0.88rem; font-weight: 300; font-style: italic; }
+
+    /* ACCORDION */
+    .doc-accordion { display: flex; flex-direction: column; gap: 0; }
+    .doc-item { background: #fff; border: 1px solid #e8e3d9; border-radius: 10px; margin-bottom: 0.6rem; overflow: hidden; transition: box-shadow 0.15s; }
+    .doc-item.hidden { display: none; }
+    .doc-item:hover { box-shadow: 0 4px 18px rgba(26,26,26,0.10); }
+    .doc-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.4rem; cursor: pointer; gap: 1rem; user-select: none; }
+    .doc-header-left { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; flex: 1; }
+    .doc-name { font-size: 0.9rem; font-weight: 500; color: #1a1a1a; line-height: 1.3; }
+    .doc-status-badge { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.07em; text-transform: uppercase; padding: 0.18rem 0.55rem; border-radius: 4px; white-space: nowrap; }
+    .badge-pub { background: #eef5ee; color: #2a4a2a; border: 1px solid #a8c4a8; }
+    .badge-nopub { background: #f5f5f5; color: #666; border: 1px solid #ddd; }
+    .doc-timing-pill { font-family: 'DM Mono', monospace; font-size: 0.58rem; color: #999; letter-spacing: 0.04em; }
+    .doc-chevron { font-size: 0.75rem; color: #aaa; transition: transform 0.2s; flex-shrink: 0; }
+    .doc-item.open .doc-chevron { transform: rotate(180deg); }
+
+    .doc-body { display: none; padding: 0 1.4rem 1.4rem; border-top: 1px solid #f0ede7; }
+    .doc-item.open .doc-body { display: block; }
+    .doc-section { margin-top: 1.1rem; }
+    .doc-section-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: #999; margin-bottom: 0.5rem; display: block; }
+    .doc-note { font-size: 0.83rem; color: #444; font-weight: 300; line-height: 1.75; background: #f9f8f6; border-radius: 8px; padding: 0.75rem 1rem; }
+    .doc-note strong { font-weight: 500; color: #1a1a1a; }
+    .doc-note .warn { color: #8b3a3a; font-weight: 500; }
+
+    .doc-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0; }
+    .doc-list { margin: 0; padding-left: 1.1rem; }
+    .doc-list li { font-size: 0.8rem; color: #444; font-weight: 300; line-height: 1.65; margin-bottom: 0.25rem; }
+
+    .doc-refs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0; }
+    .doc-ref-chip { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.05em; color: #555; background: #f5f5f5; border: 1px solid #ddd; padding: 0.18rem 0.55rem; border-radius: 4px; }
+
+    .redact-label-red { color: #8b3a3a; }
+    .redact-label-green { color: #2a4a2a; }
+
+    @media (max-width: 720px) {
+      .doc-columns { grid-template-columns: 1fr; }
+      .doc-ref-filters { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CTIS Document Reference Guide</h1>
+  <p class="subtitle">Upload instructions, publication status, redaction requirements, and regulatory citations for every document type in the CTIS system.</p>
+
+  <div class="doc-ref-filters">
+    <div class="filter-group">
+      <span class="filter-group-label">Status</span>
+      <button class="filter-btn" data-filter="status" data-value="pub" onclick="docFilter('status','pub')">For publication</button>
+      <button class="filter-btn" data-filter="status" data-value="nopub" onclick="docFilter('status','nopub')">Not for publication</button>
+    </div>
+    <div class="filter-divider"></div>
+    <div class="filter-group">
+      <span class="filter-group-label">Stage</span>
+      <button class="filter-btn" data-filter="stage" data-value="initial" onclick="docFilter('stage','initial')">Initial CTA</button>
+      <button class="filter-btn" data-filter="stage" data-value="ongoing" onclick="docFilter('stage','ongoing')">Ongoing</button>
+      <button class="filter-btn" data-filter="stage" data-value="eot" onclick="docFilter('stage','eot')">End of trial</button>
+      <button class="filter-btn" data-filter="stage" data-value="sm" onclick="docFilter('stage','sm')">Substantial modification</button>
+    </div>
+  </div>
+
+  <div id="doc-empty-state">Select a status or stage above to view documents.</div>
+  <p class="doc-results-count" id="doc-results-count" style="display:none;"></p>
+  <div class="doc-accordion" id="doc-accordion" style="display:none;">
+
+    <!-- 1. Clinical Trial Protocol -->
+    <div class="doc-item" data-status="pub" data-stage="initial sm" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Clinical Trial Protocol</span>
+          <span class="doc-status-badge badge-pub">For publication</span>
+          <span class="doc-timing-pill">Cat. 2 &amp; 3: at first MSC decision · Cat. 1 paediatric/PIP: with final results · Cat. 1 adult-only: 30 months after end of trial</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">TWO versions required. Upload the "for publication" version first, with personal data and CCI removed, then upload the linked "not for publication" full version. <strong>Remove file metadata (file properties / author fields) from both versions before upload.</strong><br><br><strong>Publication timing by category:</strong> Cat. 2 &amp; 3 — at first MSC decision. Cat. 1 paediatric/PIP — published together with the final summary of results, as soon as results are submitted in CTIS. Cat. 1 adult-only — 30 months after end of trial in the EU/EEA.</div></div>
+        <div class="doc-section"><span class="doc-section-label">Redaction guide</span>
+          <div class="doc-columns">
+            <div><span class="doc-section-label redact-label-red">Redact from published version</span><ul class="doc-list"><li>Subject/patient identifiers and personal data</li><li>Private contact details of investigators (functional/professional details should be retained)</li><li>Signatures (must always be removed from published version)</li><li>Commercially confidential manufacturing details</li><li>Unpublished proprietary assay or biomarker methods</li><li>IP-sensitive compound or formulation information (pre-authorisation)</li></ul></div>
+            <div><span class="doc-section-label redact-label-green">Retain in published version</span><ul class="doc-list"><li>Protocol title, version date, and CTIS/EudraCT number</li><li>Primary and secondary objectives</li><li>Inclusion and exclusion criteria</li><li>Study design, endpoints, and statistical methods</li><li>Investigational product name (INN preferred)</li><li>Names of principal investigators and head of clinic/institution</li><li>Professional/functional contact details of principal investigators</li><li>Sponsor name and functional contact details</li></ul></div>
+          </div>
+        </div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 25(1)(a)</span><span class="doc-ref-chip">CTR Annex I, Section A</span><span class="doc-ref-chip">Revised CTIS Transparency Rules</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 2. Investigator's Brochure -->
+    <div class="doc-item" data-status="nopub" data-stage="initial ongoing sm" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Investigator's Brochure (IB)</span>
+          <span class="doc-status-badge badge-nopub">Not for publication</span>
+          <span class="doc-timing-pill">Not for publication</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">Not published. Upload an IB for a non-authorised IMP in the 'not for publication' slot. For an authorised IMP, the SmPC may be used in place of an IB as applicable. <span class="warn">⚠ Do NOT place the IB in the SmPC placeholder — it will be published automatically.</span></div></div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Annex I, Section C</span><span class="doc-ref-chip">CTR Annex III, point (c)</span><span class="doc-ref-chip">Revised CTIS Transparency Rules</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 3. IMPD Full -->
+    <div class="doc-item" data-status="nopub" data-stage="initial sm" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Investigational Medicinal Product Dossier (IMPD) — Full</span>
+          <span class="doc-status-badge badge-nopub">Not for publication</span>
+          <span class="doc-timing-pill">Not for publication under the Revised CTIS Transparency Rules</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">ONE version only → "not for publication" slot. IMPD-E and IMPD-S are not published under the revised transparency framework. Quality sections remain available for authority assessment in CTIS.</div></div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 25(1)(b)</span><span class="doc-ref-chip">CTR Annex I, Section B</span><span class="doc-ref-chip">CTR Annex III, point (b)</span><span class="doc-ref-chip">Revised CTIS Transparency Rules</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 4. Simplified IMPD -->
+    <div class="doc-item" data-status="nopub" data-stage="initial" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Simplified IMPD (for Authorised IMP)</span>
+          <span class="doc-status-badge badge-nopub">Not for publication</span>
+          <span class="doc-timing-pill">Not published · Use when IMP holds current MA in any EU/EEA MS</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">ONE version only → "not for publication" slot. Cross-references the current SmPC/EPAR. Confirm the SmPC version is current at time of submission.</div></div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 25(6)</span><span class="doc-ref-chip">CTR Annex I, Section B(2)</span><span class="doc-ref-chip">CTR Annex III</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 5. SmPC -->
+    <div class="doc-item" data-status="pub" data-stage="initial" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Summary of Medicinal Product Characteristics (SmPC)</span>
+          <span class="doc-status-badge badge-pub">For publication</span>
+          <span class="doc-timing-pill">Category 2 &amp; 3 only · At the first MSC decision</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">Category 2 &amp; 3 only: upload the "for publication" SmPC first, then the linked "not for publication" version if needed for the workspace record. <span class="warn">⚠ Do not upload an IB into the SmPC placeholder.</span></div></div>
+        <div class="doc-section"><span class="doc-section-label">Redaction guide</span>
+          <div class="doc-columns">
+            <div><span class="doc-section-label redact-label-red">Redact from published version</span><ul class="doc-list"><li>Draft watermark text or internal headers/footers</li><li>Commercially sensitive formulation details not in approved labelling</li><li>Internal version tracking identifiers</li></ul></div>
+            <div><span class="doc-section-label redact-label-green">Retain in published version</span><ul class="doc-list"><li>All standard SmPC sections 1–20</li><li>Authorised indications and posology</li><li>Contraindications and adverse drug reaction data</li><li>Pharmacological and pharmacokinetic properties</li></ul></div>
+          </div>
+        </div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 25(6)</span><span class="doc-ref-chip">CTR Annex I, Section B(2)(a)</span><span class="doc-ref-chip">Revised CTIS Transparency Rules</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span><span class="doc-ref-chip">Directive 2001/83/EC Art. 11</span></div></div>
+      </div>
+    </div>
+
+    <!-- 6. ICF -->
+    <div class="doc-item" data-status="pub" data-stage="initial" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Informed Consent Form (ICF) &amp; Patient Information Sheet</span>
+          <span class="doc-status-badge badge-pub">For publication</span>
+          <span class="doc-timing-pill">Category 2 &amp; 3: at the first MSC decision · Category 1: not published</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">Category 1: ONE version only → "not for publication" slot. Category 2 &amp; 3: upload the "for publication" version first, then upload the linked "not for publication" full version.</div></div>
+        <div class="doc-section"><span class="doc-section-label">Redaction guide</span>
+          <div class="doc-columns">
+            <div><span class="doc-section-label redact-label-red">Redact from published version</span><ul class="doc-list"><li>Private contact details of investigators (site-specific phone numbers, personal addresses)</li><li>Signatures (must always be removed from published version)</li><li>Personal data of trial coordinator or staff (other than PIs)</li><li>Track-change metadata (submit clean version to "for pub" placeholder)</li></ul></div>
+            <div><span class="doc-section-label redact-label-green">Retain in published version</span><ul class="doc-list"><li>Plain-language description of the trial purpose</li><li>Participant rights and voluntary withdrawal procedures</li><li>Risk and benefit summary</li><li>Names of principal investigators and head of clinic/institution</li><li>Professional/functional contact details of principal investigators</li><li>General sponsor functional contact information</li><li>Version date and document number</li></ul></div>
+          </div>
+        </div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 25(1)(c)</span><span class="doc-ref-chip">EU CTR Art. 29</span><span class="doc-ref-chip">CTR Annex III, point (f)</span><span class="doc-ref-chip">Revised CTIS Transparency Rules</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 7. Recruitment Arrangements -->
+    <div class="doc-item" data-status="pub" data-stage="initial sm" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Recruitment Arrangements &amp; Advertisement Materials</span>
+          <span class="doc-status-badge badge-pub">For publication</span>
+          <span class="doc-timing-pill">Category 2 &amp; 3 only · At the first MSC decision</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">Category 2 &amp; 3 only: upload the "for publication" version first, then upload the linked "not for publication" full version.</div></div>
+        <div class="doc-section"><span class="doc-section-label">Redaction guide</span>
+          <div class="doc-columns">
+            <div><span class="doc-section-label redact-label-red">Redact from published version</span><ul class="doc-list"><li>Private contact details of investigators (personal phone numbers, private addresses)</li><li>Signatures (must always be removed from published version)</li><li>Internal site identifiers or cost codes</li><li>Site-specific financial incentive amounts</li><li>Draft/internal version markers</li></ul></div>
+            <div><span class="doc-section-label redact-label-green">Retain in published version</span><ul class="doc-list"><li>General description of the study and its purpose</li><li>Broad eligibility criteria summary</li><li>Names of principal investigators and head of clinic/institution</li><li>Professional/functional contact route (e.g. functional email, generic site number)</li><li>Sponsor name and trial identifier</li></ul></div>
+          </div>
+        </div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">CTR Annex I, Section D(5)</span><span class="doc-ref-chip">CTR Annex III, point (f)</span><span class="doc-ref-chip">Revised CTIS Transparency Rules</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 10. Summary of Results / Lay Summary -->
+    <div class="doc-item" data-status="pub" data-stage="eot" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Summary of Results &amp; Lay Summary</span>
+          <span class="doc-status-badge badge-pub">For publication</span>
+          <span class="doc-timing-pill">Within 12 months of end of trial (6 months for paediatric/PIP)</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">TWO versions required (all categories): (1) full version → "not for publication" slot; (2) publication version → "for publication" slot. Submitted via the CTIS results module.</div></div>
+        <div class="doc-section"><span class="doc-section-label">Redaction guide</span>
+          <div class="doc-columns">
+            <div><span class="doc-section-label redact-label-red">Redact from published version</span><ul class="doc-list"><li>Any individual participant data or subject identifiers</li><li>Names of individual investigators</li><li>Commercially sensitive pipeline or strategy information</li></ul></div>
+            <div><span class="doc-section-label redact-label-green">Retain in published version</span><ul class="doc-list"><li>Plain-language description of trial outcomes</li><li>High-level safety and efficacy findings (aggregate)</li><li>General description of trial population</li><li>Sponsor name and trial registration number</li></ul></div>
+          </div>
+        </div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 37(2)</span><span class="doc-ref-chip">EU CTR Art. 37(3)</span><span class="doc-ref-chip">EU CTR Art. 81(1)</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 11. ASR -->
+    <div class="doc-item" data-status="nopub" data-stage="ongoing" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Annual Safety Report (ASR)</span>
+          <span class="doc-status-badge badge-nopub">Not for publication</span>
+          <span class="doc-timing-pill">Annually · Within 60 days of data lock date</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">ONE version only → "not for publication" slot.</div></div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 43</span><span class="doc-ref-chip">CTR Annex III</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 12. SUSAR -->
+    <div class="doc-item" data-status="nopub" data-stage="ongoing" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">SUSAR Reports</span>
+          <span class="doc-status-badge badge-nopub">Not for publication</span>
+          <span class="doc-timing-pill">Via EudraVigilance ONLY · Fatal 7 days · All other 15 days</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note"><span class="warn">⚠ DO NOT upload to CTIS.</span> SUSARs are submitted exclusively via EudraVigilance. Fatal/life-threatening = 7 days; all other = 15 days.</div></div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 42</span><span class="doc-ref-chip">EudraVigilance</span><span class="doc-ref-chip">ICH E2A</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 13. Substantial Modification -->
+    <div class="doc-item" data-status="pub" data-stage="sm" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Substantial Modification — Protocol Amendment</span>
+          <span class="doc-status-badge badge-pub">For publication</span>
+          <span class="doc-timing-pill">When the authorised substantial modification becomes public in CTIS</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">For a for publication amendment, upload the "for publication" version first, then the linked "not for publication" version as needed. <span class="warn">⚠ Track-changes version for authority review only — do not upload it to a public-facing slot.</span></div></div>
+        <div class="doc-section"><span class="doc-section-label">Redaction guide</span>
+          <div class="doc-columns">
+            <div><span class="doc-section-label redact-label-red">Redact from published version</span><ul class="doc-list"><li>All same redactions as original protocol apply</li><li>Track-changes version: for MSC review ONLY</li><li>Names of reviewers or internal review dates</li></ul></div>
+            <div><span class="doc-section-label redact-label-green">Retain in published version</span><ul class="doc-list"><li>Reason and justification summary for the modification</li><li>Updated protocol sections (clean final text only)</li><li>Modification scope description</li></ul></div>
+          </div>
+        </div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 15–16</span><span class="doc-ref-chip">EU CTR Art. 81</span><span class="doc-ref-chip">Revised CTIS Transparency Rules</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 14. PIP Compliance Statement -->
+    <div class="doc-item" data-status="pub" data-stage="initial" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">PIP Compliance Statement &amp; PDCO Opinion</span>
+          <span class="doc-status-badge badge-pub">For publication</span>
+          <span class="doc-timing-pill">Where applicable · Cat. 1 paediatric/PIP: with final results · Cat. 2 &amp; 3: at first MSC decision</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">TWO versions required where applicable: upload the "for publication" version first, then the linked "not for publication" full version.</div></div>
+        <div class="doc-section"><span class="doc-section-label">Redaction guide</span>
+          <div class="doc-columns">
+            <div><span class="doc-section-label redact-label-red">Redact from published version</span><ul class="doc-list"><li>CCI elements per EMA PDCO guidance</li><li>Proprietary paediatric formulation data not yet published</li></ul></div>
+            <div><span class="doc-section-label redact-label-green">Retain in published version</span><ul class="doc-list"><li>PIP decision number (P/NNNN/YYYY)</li><li>Compliance confirmation statement</li><li>Agreed paediatric studies list</li><li>Waivers or deferrals granted</li></ul></div>
+          </div>
+        </div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">Regulation (EC) 1901/2006 Art. 7 &amp; 8</span><span class="doc-ref-chip">Regulation (EC) 1901/2006 Art. 28</span><span class="doc-ref-chip">EU CTR Annex I</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 15. Ethics Committee Opinion -->
+    <div class="doc-item" data-status="nopub" data-stage="initial" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Ethics Committee Opinion</span>
+          <span class="doc-status-badge badge-nopub">Not for publication</span>
+          <span class="doc-timing-pill">EC outcome published as structured data · Full document not published</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">ONE version only → "not for pub" slot. The EC outcome (positive/negative) is captured separately as structured data in CTIS and is published automatically.</div></div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 4, 6, 8</span><span class="doc-ref-chip">CTR Annex III</span><span class="doc-ref-chip">EU CTR Art. 81(3)</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 16. Insurance / Indemnity -->
+    <div class="doc-item" data-status="nopub" data-stage="initial" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">Insurance / Indemnity Documentation</span>
+          <span class="doc-status-badge badge-nopub">Not for publication</span>
+          <span class="doc-timing-pill">Part II · National requirements vary</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">ONE version only → "not for pub" slot. Check requirements for each Member State concerned.</div></div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Art. 76</span><span class="doc-ref-chip">CTR Annex I, Section D(4)</span><span class="doc-ref-chip">CTR Annex III</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+    <!-- 17. PI CV -->
+    <div class="doc-item" data-status="nopub" data-stage="initial" onclick="docToggle(this)">
+      <div class="doc-header">
+        <div class="doc-header-left">
+          <span class="doc-name">PI Curriculum Vitae</span>
+          <span class="doc-status-badge badge-nopub">Not for publication</span>
+          <span class="doc-timing-pill">Part II only · Not published</span>
+        </div>
+        <span class="doc-chevron">▼</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-section"><span class="doc-section-label">Upload note</span><div class="doc-note">ONE version only → "not for pub" slot. Minimise personal data included even in the not-for-publication version.</div></div>
+        <div class="doc-section"><span class="doc-section-label">References</span><div class="doc-refs"><span class="doc-ref-chip">EU CTR Annex I, Section D(3)</span><span class="doc-ref-chip">CTR Annex III</span><span class="doc-ref-chip">ICH E6(R2) GCP §4.1</span><span class="doc-ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div></div>
+      </div>
+    </div>
+
+  </div><!-- end accordion -->
+
+<script>
+  function docToggle(el) { el.classList.toggle('open'); }
+
+  let activeStatus = 'all';
+  let activeStage = 'all';
+
+  function docFilter(type, value) {
+    if (type === 'status') activeStatus = value;
+    if (type === 'stage') activeStage = value;
+
+    document.querySelectorAll(`[data-filter="${type}"]`).forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.value === value);
+    });
+
+    document.getElementById('doc-empty-state').style.display = 'none';
+    document.getElementById('doc-accordion').style.display = 'flex';
+    document.getElementById('doc-results-count').style.display = 'block';
+
+    const items = document.querySelectorAll('.doc-item');
+    let visible = 0;
+    items.forEach(item => {
+      const statusMatch = activeStatus === 'all' || item.dataset.status === activeStatus;
+      const stageMatch = activeStage === 'all' || item.dataset.stage.includes(activeStage);
+      const show = statusMatch && stageMatch;
+      item.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+
+    const total = items.length;
+    document.getElementById('doc-results-count').textContent =
+      visible === total ? `Showing all ${total} documents` : `Showing ${visible} of ${total} documents`;
+  }
+</script>
+
+</body>
+</html>

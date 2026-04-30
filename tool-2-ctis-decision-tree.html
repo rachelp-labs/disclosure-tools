@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool 2 — CTIS Submission Decision Tree</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #fff; color: #1a1a1a; font-size: 15px; line-height: 1.6; padding: 2.5rem 2rem 4rem; }
+    h1 { font-size: 1.4rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .subtitle { font-size: 0.85rem; color: #666; font-weight: 300; margin-bottom: 2rem; }
+    .tool-card { border: 1px solid #e8e3d9; border-radius: 10px; overflow: hidden; }
+    .tree-container { padding: 2rem; }
+    .tree-step { display: none; animation: fadeIn 0.25s ease; }
+    .tree-step.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .step-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
+    .step-num { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; color: #999; background: #f5f5f5; padding: 0.3rem 0.55rem; border-radius: 4px; white-space: nowrap; margin-top: 0.2rem; flex-shrink: 0; }
+    .step-question { font-size: 1.1rem; font-weight: 500; color: #1a1a1a; line-height: 1.3; }
+    .step-question small { display: block; font-size: 0.82rem; font-weight: 300; color: #666; margin-top: 0.3rem; }
+    .choices { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.5rem; }
+    .choice-btn { display: flex; align-items: flex-start; gap: 0.75rem; background: #faf9f7; border: 1px solid #e8e3d9; border-radius: 8px; padding: 0.85rem 1rem; cursor: pointer; text-align: left; transition: all 0.18s; font-family: 'DM Sans', sans-serif; }
+    .choice-btn:hover { background: #f0ede7; border-color: #ccc; transform: translateX(2px); }
+    .choice-text { flex: 1; }
+    .choice-label { font-size: 0.88rem; font-weight: 500; color: #1a1a1a; display: block; margin-bottom: 0.15rem; }
+    .choice-desc { font-size: 0.8rem; font-weight: 300; color: #777; line-height: 1.5; }
+    .result-box { border-radius: 8px; padding: 1.1rem 1.25rem; margin-bottom: 1rem; border-left: 3px solid #ccc; background: #f9f8f6; }
+    .result-box.green { border-left-color: #a8c4a8; }
+    .result-box.amber { border-left-color: #d4aa70; }
+    .result-box.red { border-left-color: #c4848a; }
+    .result-box.neutral { border-left-color: #ccc; }
+    .result-title { font-weight: 500; font-size: 0.88rem; margin-bottom: 0.4rem; color: #1a1a1a; }
+    .result-body { font-size: 0.83rem; font-weight: 300; color: #444; line-height: 1.65; }
+    .result-body strong { font-weight: 500; color: #1a1a1a; }
+    .result-body ul { padding-left: 1.2rem; margin-top: 0.4rem; }
+    .result-body ul li { margin-bottom: 0.2rem; }
+    .ref-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+    .ref-chip { font-family: 'DM Mono', monospace; font-size: 0.67rem; letter-spacing: 0.05em; background: #f5f5f5; color: #555; border: 1px solid #ddd; padding: 0.18rem 0.55rem; border-radius: 20px; }
+    .progress-track { display: flex; gap: 0.3rem; margin-bottom: 1.75rem; }
+    .progress-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: background 0.2s; }
+    .progress-dot.done { background: #aaa; }
+    .progress-dot.current { background: #1a1a1a; width: 18px; border-radius: 3px; }
+    .breadcrumb { font-size: 0.78rem; color: #999; margin-bottom: 1.25rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; }
+    .breadcrumb span { color: #555; font-weight: 400; }
+    .breadcrumb .sep { color: #ccc; }
+    .outcome-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .outcome-badge { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.25rem 0.7rem; border-radius: 20px; background: #f5f5f5; color: #555; border: 1px solid #ddd; }
+    .tree-nav { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+    .btn-back, .btn-reset { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; padding: 0.45rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.18s; border: 1px solid #ddd; background: transparent; color: #777; }
+    .btn-back:hover, .btn-reset:hover { background: #f5f5f5; color: #333; }
+  </style>
+</head>
+<body>
+  <h1>CTIS Submission Decision Tree</h1>
+  <p class="subtitle">Navigate CTIS document selection, publication rules, and submission requirements by trial phase and lifecycle stage.</p>
+  <div class="tool-card"><div class="tree-container" id="ctis-tree-container">
+
+    <div class="tree-step active" id="ctis-s0">
+      <div class="progress-track"><div class="progress-dot current"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+      <div class="step-header"><span class="step-num">Step 1</span><div class="step-question">What is the trial category / trial type?<small>EU CTR category determines publication obligations throughout the trial lifecycle.</small></div></div>
+      <div class="choices">
+        <button class="choice-btn" onclick="ctisGo('s1-phase1')"><span class="choice-text"><span class="choice-label">Category 1 — Phase I</span><span class="choice-desc">Pharmaceutical development trials</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s1-phase2')"><span class="choice-text"><span class="choice-label">Category 2 — Phase I/II integrated / Phase II / Phase III</span><span class="choice-desc">Therapeutic exploratory &amp; confirmatory trials</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s1-phase3')"><span class="choice-text"><span class="choice-label">Category 3 — Phase III–IV integrated, Phase IV, low-interventional</span><span class="choice-desc">Therapeutic use trials</span></span></button>
+      </div>
+    </div>
+
+    <!-- CAT 1 -->
+    <div class="tree-step" id="ctis-s1-phase1">
+      <div class="progress-track"><div class="progress-dot done"></div><div class="progress-dot current"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+      <div class="breadcrumb"><span>Cat. 1</span></div>
+      <div class="step-header"><span class="step-num">Step 2</span><div class="step-question">Select the lifecycle stage</div></div>
+      <div class="choices">
+        <button class="choice-btn" onclick="ctisGo('s2-p1-initial')"><span class="choice-text"><span class="choice-label">Initial CTA</span><span class="choice-desc">First submission to authorise the trial.</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p1-ongoing')"><span class="choice-text"><span class="choice-label">Ongoing Trial</span><span class="choice-desc">Maintenance, notifications, safety reporting.</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p1-sm')"><span class="choice-text"><span class="choice-label">Substantial Modification</span><span class="choice-desc">Protocol amendment or significant change requiring authorisation.</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p1-safety')"><span class="choice-text"><span class="choice-label">Safety Reporting</span><span class="choice-desc">SUSARs, ASR, Urgent Safety Measures.</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p1-eot')"><span class="choice-text"><span class="choice-label">End of Trial</span><span class="choice-desc">EoT notification and results submission.</span></span></button>
+      </div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s0')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p1-initial">
+      <div class="breadcrumb"><span>Cat. 1</span><span class="sep">›</span><span>Initial CTA</span></div><div class="outcome-header"><span class="outcome-badge">Initial CTA</span></div>
+      <div class="result-box neutral"><div class="result-title">Part I — Common Documents</div><div class="result-body"><strong>Protocol:</strong> For publication. Upload the 'for publication' version first; add a 'not for publication' version only where needed for assessment. <strong>Note — Published 30 months after EoT.</strong><br><br><strong>IB:</strong> Not published. Upload an IB for a non-authorised IMP. For an authorised IMP, the SmPC may be used in place of an IB as applicable. Do not upload an IB in an SmPC field.<br><br><strong>IMPD:</strong><br>• Non-authorised IMP: full IMPD + IB<br>• Authorised IMP: Simplified IMPD + current SmPC<br><br><strong>Note — SmPC: Not published for Category 1.</strong></div></div>
+      <div class="result-box neutral"><div class="result-title">Part II — National Documents</div><div class="result-body"><ul><li>Ethics Committee Opinion — not published (outcome as structured data only)</li><li>Insurance / Indemnity — not published</li><li>PI Curriculum Vitae — not published</li><li><strong>ICF — Not published for Category 1.</strong> Upload only in the 'not for publication' slot.</li></ul></div></div>
+      <div class="result-box amber"><div class="result-title">EudraCT / Paediatric Check</div><div class="result-body">Four scenarios still require EudraCT or PDCO involvement:<br><ul><li><strong>PIP trial with EU/EEA sites:</strong> Register in CTIS. Attach PDCO opinion + PIP Compliance Statement.</li><li><strong>PIP/Art.46 exclusively outside EEA:</strong> Register in EudraCT Third Country File — NOT CTIS.</li><li><strong>Art.46 study (MAH-sponsored):</strong> Submit to competent authority within 6 months of completion.</li><li><strong>Grandfathered trial:</strong> Remains on EudraCT only.</li></ul></div></div>
+      <div class="result-box red"><div class="result-title">RFI Watch — Monitor CTIS Workspace Daily</div><div class="result-body">Monitor the CTIS sponsor workspace closely for RFIs and deadlines. Missing an RFI deadline can cause the application to lapse.<br><br><ul><li><strong>Validation RFI (days 1–10):</strong> ≤10 days to respond.</li><li><strong>Assessment RFI Part I (days 1–45):</strong> 12 days. Non-response = lapses.</li><li><strong>Assessment RFI Part II:</strong> 12 days per MSC RFI.</li></ul></div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 25(1)(a)</span><span class="ref-chip">CTR Annex I, Section A</span><span class="ref-chip">Revised CTIS Transparency Rules</span><span class="ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase1')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p1-ongoing">
+      <div class="breadcrumb"><span>Cat. 1</span><span class="sep">›</span><span>Ongoing Trial</span></div><div class="outcome-header"><span class="outcome-badge">Ongoing Trial</span></div>
+      <div class="result-box neutral"><div class="result-title">Annual Safety Report (ASR)</div><div class="result-body"><strong>Deadline:</strong> within 60 days of data lock date. Not published. Upload only in the 'not for publication' slot.</div></div>
+      <div class="result-box neutral"><div class="result-title">Protocol Changes</div><div class="result-body">Does the change meet the CTR definition of a substantial modification (Art. 2(13))?<br><br><ul><li><strong>If yes:</strong> Submit as a Substantial Modification in CTIS.</li><li><strong>If no:</strong> Submit as a Non-Substantial Modification. Notification only — no documents are published.</li></ul></div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 43(2)</span><span class="ref-chip">EU CTR Art. 2(13), 15–16</span><span class="ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase1')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p1-sm">
+      <div class="breadcrumb"><span>Cat. 1</span><span class="sep">›</span><span>Substantial Modification</span></div><div class="outcome-header"><span class="outcome-badge">Substantial Modification</span></div>
+      <div class="result-box neutral"><div class="result-title">SM Application Dossier</div><div class="result-body"><strong>Protocol Amendment:</strong> Upload the 'for publication' version first. Track-change / comparison material for assessment should stay in 'not for publication'.<br><br><strong>Updated ICF:</strong> Not required for Cat. 1.<br><br><strong>IMPD/IB:</strong> Update and resubmit if IMP status changed.</div></div>
+      <div class="result-box red"><div class="result-title">SM RFI Deadlines</div><div class="result-body"><strong>SM Part I RFI (raised by RMS):</strong> 12 days to respond. Non-response = SM lapses.<br><strong>SM Part II RFI (per MSC):</strong> 12 days per MSC.</div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 15–16</span><span class="ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase1')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p1-safety">
+      <div class="breadcrumb"><span>Cat. 1</span><span class="sep">›</span><span>Safety Reporting</span></div><div class="outcome-header"><span class="outcome-badge">Safety Reporting</span></div>
+      <div class="result-box red"><div class="result-title">SUSARs → EudraVigilance ONLY</div><div class="result-body">Fatal/life-threatening: <strong>7-day deadline.</strong> All other: <strong>15 days.</strong> DO NOT submit via CTIS.</div></div>
+      <div class="result-box neutral"><div class="result-title">Annual Safety Report (ASR)</div><div class="result-body">Due annually. Via CTIS to RMS/MSC. NOT published.</div></div>
+      <div class="result-box amber"><div class="result-title">Urgent Safety Measure (USM)</div><div class="result-body">If immediate risk: notify the urgent safety measure in CTIS without delay. Then assess whether a consequential substantial modification is required.</div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 42</span><span class="ref-chip">EU CTR Art. 43</span><span class="ref-chip">EU CTR Art. 54</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase1')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p1-eot">
+      <div class="breadcrumb"><span>Cat. 1</span><span class="sep">›</span><span>End of Trial</span></div><div class="outcome-header"><span class="outcome-badge">End of Trial</span></div>
+      <div class="result-box neutral"><div class="result-title">EoT Notification</div><div class="result-body">Notify via CTIS within <strong>15 days</strong> of end of trial in the Member State concerned / last Member State concerned / globally, as applicable.</div></div>
+      <div class="result-box green"><div class="result-title">Results Submission</div><div class="result-body"><strong>CSR</strong>: Deadline: within 30 days after the MA is granted, the procedure is completed, or the MAA is withdrawn.<br><br><strong>Summary of results + lay summary:</strong> Generally within 12 months after end of trial in all Member States concerned; 6 months if paediatric.</div></div>
+      <div class="result-box red"><div class="result-title">Structured Data Check</div><div class="result-body">Confirm all CTIS structured data fields are free of personal data and CCI before submitting — cannot be redacted post-submission.</div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 36</span><span class="ref-chip">EU CTR Art. 37(1)–(3)</span><span class="ref-chip">EU CTR Art. 37(4)</span><span class="ref-chip">Revised CTIS Transparency Rules</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase1')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+
+    <!-- CAT 2 -->
+    <div class="tree-step" id="ctis-s1-phase2">
+      <div class="progress-track"><div class="progress-dot done"></div><div class="progress-dot current"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+      <div class="breadcrumb"><span>Cat. 2</span></div>
+      <div class="step-header"><span class="step-num">Step 2</span><div class="step-question">Select the lifecycle stage</div></div>
+      <div class="choices">
+        <button class="choice-btn" onclick="ctisGo('s2-p23-initial')"><span class="choice-text"><span class="choice-label">Initial CTA</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p23-ongoing')"><span class="choice-text"><span class="choice-label">Ongoing Trial</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p23-sm')"><span class="choice-text"><span class="choice-label">Substantial Modification</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p23-safety')"><span class="choice-text"><span class="choice-label">Safety Reporting</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p23-eot')"><span class="choice-text"><span class="choice-label">End of Trial</span></span></button>
+      </div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s0')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p23-initial">
+      <div class="breadcrumb"><span>Cat. 2</span><span class="sep">›</span><span>Initial CTA</span></div><div class="outcome-header"><span class="outcome-badge">Initial CTA</span></div>
+      <div class="result-box neutral"><div class="result-title">Part I — Common Documents</div><div class="result-body"><strong>Protocol:</strong> For publication. Upload the 'for publication' version first. <strong>Note — Published on first MSC decision.</strong><br><br><strong>IB:</strong> Not published. Do not upload an IB in an SmPC field.<br><br><strong>IMPD:</strong><br>• Non-authorised IMP: full IMPD + IB<br>• Authorised IMP: Simplified IMPD + current SmPC<br><br><strong>Note — SmPC:</strong> For publication for categories 2 and 3.</div></div>
+      <div class="result-box green"><div class="result-title">Part II — National Documents</div><div class="result-body"><strong>ICF:</strong> For publication for Category 2. Upload the 'for publication' version first; add a 'not for publication' version if the document contains redacted CCI or personal data.</div></div>
+      <div class="result-box amber"><div class="result-title">EudraCT / Paediatric Check</div><div class="result-body"><ul><li><strong>PIP trial with EU/EEA sites:</strong> Register in CTIS. Attach PDCO opinion + PIP Compliance Statement.</li><li><strong>PIP/Art.46 exclusively outside EEA:</strong> Register in EudraCT Third Country File — NOT CTIS.</li><li><strong>Art.46 study (MAH-sponsored):</strong> Submit to competent authority within 6 months of completion.</li><li><strong>Grandfathered trial:</strong> Remains on EudraCT only.</li></ul></div></div>
+      <div class="result-box red"><div class="result-title">RFI Watch — Monitor CTIS Workspace Daily</div><div class="result-body"><ul><li><strong>Validation RFI (days 1–10):</strong> ≤10 days. Non-response = lapses.</li><li><strong>Assessment RFI Part I (days 1–45):</strong> 12 days. Non-response = lapses.</li><li><strong>Assessment RFI Part II:</strong> 12 days per MSC.</li></ul></div></div>
+      <div class="ref-chips"><span class="ref-chip">Revised CTIS Transparency Rules</span><span class="ref-chip">CTR Annex I</span><span class="ref-chip">CTR Annex III, point (f)</span><span class="ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase2')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p23-ongoing">
+      <div class="breadcrumb"><span>Cat. 2</span><span class="sep">›</span><span>Ongoing Trial</span></div><div class="outcome-header"><span class="outcome-badge">Ongoing Trial</span></div>
+      <div class="result-box neutral"><div class="result-title">Annual Safety Report (ASR)</div><div class="result-body"><strong>Deadline:</strong> within 60 days of data lock date. Not published. Upload only in the 'not for publication' slot.</div></div>
+      <div class="result-box neutral"><div class="result-title">Protocol Changes</div><div class="result-body"><ul><li><strong>If substantial modification:</strong> Submit as SM in CTIS. The updated protocol will be published following authorisation.</li><li><strong>If non-substantial:</strong> Notification only — no documents are published.</li></ul></div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 43(2)</span><span class="ref-chip">EU CTR Art. 2(13), 15–16</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase2')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p23-sm">
+      <div class="breadcrumb"><span>Cat. 2</span><span class="sep">›</span><span>Substantial Modification</span></div><div class="outcome-header"><span class="outcome-badge">Substantial Modification</span></div>
+      <div class="result-box neutral"><div class="result-title">SM Application Dossier</div><div class="result-body"><strong>Protocol Amendment:</strong> Upload 'for publication' version first. Track-change material stays in 'not for publication'.<br><br><strong>Updated ICF:</strong> For publication for Cat. 2.<br><br><strong>IMPD/IB:</strong> Update and resubmit if IMP status changed.</div></div>
+      <div class="result-box red"><div class="result-title">SM RFI Deadlines</div><div class="result-body"><strong>Part I (by RMS):</strong> 12 days. Non-response = SM lapses.<br><strong>Part II (per MSC):</strong> 12 days per MSC RFI.</div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 15–16</span><span class="ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase2')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p23-safety">
+      <div class="breadcrumb"><span>Cat. 2</span><span class="sep">›</span><span>Safety Reporting</span></div><div class="outcome-header"><span class="outcome-badge">Safety Reporting</span></div>
+      <div class="result-box red"><div class="result-title">SUSARs → EudraVigilance ONLY</div><div class="result-body">Fatal/life-threatening: <strong>7-day deadline.</strong> All other: <strong>15 days.</strong> DO NOT submit via CTIS.</div></div>
+      <div class="result-box neutral"><div class="result-title">Annual Safety Report (ASR)</div><div class="result-body">Due annually. Via CTIS to RMS/MSC. NOT published.</div></div>
+      <div class="result-box amber"><div class="result-title">Urgent Safety Measure (USM)</div><div class="result-body">If immediate risk: notify the urgent safety measure in CTIS without delay. Then assess whether a consequential substantial modification is required.</div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 42</span><span class="ref-chip">EU CTR Art. 43</span><span class="ref-chip">EU CTR Art. 54</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase2')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p23-eot">
+      <div class="breadcrumb"><span>Cat. 2</span><span class="sep">›</span><span>End of Trial</span></div><div class="outcome-header"><span class="outcome-badge">End of Trial</span></div>
+      <div class="result-box neutral"><div class="result-title">EoT Notification</div><div class="result-body">Notify via CTIS within <strong>15 days</strong> of end of trial in the Member State(s) concerned.</div></div>
+      <div class="result-box green"><div class="result-title">Results Submission</div><div class="result-body"><strong>CSR</strong>: Deadline: within 30 days after the MA is granted, procedure is completed, or MAA is withdrawn.<br><br><strong>Summary of results + lay summary:</strong> Generally within 12 months; 6 months if paediatric.</div></div>
+      <div class="result-box red"><div class="result-title">Structured Data Check</div><div class="result-body">Confirm all CTIS structured data fields are free of personal data and CCI before submitting — cannot be redacted post-submission.</div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 36</span><span class="ref-chip">EU CTR Art. 37(1)–(4)</span><span class="ref-chip">Revised CTIS Transparency Rules</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase2')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+
+    <!-- CAT 3 -->
+    <div class="tree-step" id="ctis-s1-phase3">
+      <div class="progress-track"><div class="progress-dot done"></div><div class="progress-dot current"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+      <div class="breadcrumb"><span>Cat. 3</span></div>
+      <div class="step-header"><span class="step-num">Step 2</span><div class="step-question">Select the lifecycle stage</div></div>
+      <div class="choices">
+        <button class="choice-btn" onclick="ctisGo('s2-p3-initial')"><span class="choice-text"><span class="choice-label">Initial CTA</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p3-ongoing')"><span class="choice-text"><span class="choice-label">Ongoing Trial</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p3-sm')"><span class="choice-text"><span class="choice-label">Substantial Modification</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p3-safety')"><span class="choice-text"><span class="choice-label">Safety Reporting</span></span></button>
+        <button class="choice-btn" onclick="ctisGo('s2-p3-eot')"><span class="choice-text"><span class="choice-label">End of Trial</span></span></button>
+      </div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s0')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p3-initial">
+      <div class="breadcrumb"><span>Cat. 3</span><span class="sep">›</span><span>Initial CTA</span></div><div class="outcome-header"><span class="outcome-badge">Initial CTA</span></div>
+      <div class="result-box neutral"><div class="result-title">Part I — Common Documents</div><div class="result-body"><strong>Protocol:</strong> For publication. Upload the 'for publication' version first. <strong>Note — Published on first MSC decision.</strong><br><br><strong>IB:</strong> Not published. Do not upload an IB in an SmPC field.<br><br><strong>IMPD:</strong><br>• Non-authorised IMP: full IMPD + IB<br>• Authorised IMP: Simplified IMPD + current SmPC<br><br><strong>Note — SmPC:</strong> For publication for categories 2 and 3.</div></div>
+      <div class="result-box green"><div class="result-title">Part II — National Documents</div><div class="result-body"><strong>ICF:</strong> For publication for Category 3. Upload the 'for publication' version first; add a 'not for publication' version if needed.</div></div>
+      <div class="result-box amber"><div class="result-title">EudraCT / Paediatric Check</div><div class="result-body"><ul><li><strong>PIP trial with EU/EEA sites:</strong> Register in CTIS. Attach PDCO opinion + PIP Compliance Statement.</li><li><strong>PIP/Art.46 exclusively outside EEA:</strong> Register in EudraCT Third Country File — NOT CTIS.</li><li><strong>Art.46 study (MAH-sponsored):</strong> Submit to competent authority within 6 months of completion.</li><li><strong>Grandfathered trial:</strong> Remains on EudraCT only.</li></ul></div></div>
+      <div class="result-box red"><div class="result-title">RFI Watch — Monitor CTIS Workspace Daily</div><div class="result-body"><ul><li><strong>Validation RFI (days 1–10):</strong> ≤10 days. Non-response = lapses.</li><li><strong>Assessment RFI Part I (days 1–45):</strong> 12 days. Non-response = lapses.</li><li><strong>Assessment RFI Part II:</strong> 12 days per MSC.</li></ul></div></div>
+      <div class="ref-chips"><span class="ref-chip">Revised CTIS Transparency Rules</span><span class="ref-chip">CTR Annex I</span><span class="ref-chip">CTR Annex III, point (f)</span><span class="ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase3')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p3-ongoing">
+      <div class="breadcrumb"><span>Cat. 3</span><span class="sep">›</span><span>Ongoing Trial</span></div><div class="outcome-header"><span class="outcome-badge">Ongoing Trial</span></div>
+      <div class="result-box neutral"><div class="result-title">Annual Safety Report (ASR)</div><div class="result-body"><strong>Deadline:</strong> within 60 days of data lock date. Not published. Upload only in the 'not for publication' slot.</div></div>
+      <div class="result-box neutral"><div class="result-title">Protocol Changes</div><div class="result-body"><ul><li><strong>If substantial modification:</strong> Submit as SM in CTIS.</li><li><strong>If non-substantial:</strong> Notification only — no documents are published.</li></ul></div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 43(2)</span><span class="ref-chip">EU CTR Art. 2(13), 15–16</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase3')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p3-sm">
+      <div class="breadcrumb"><span>Cat. 3</span><span class="sep">›</span><span>Substantial Modification</span></div><div class="outcome-header"><span class="outcome-badge">Substantial Modification</span></div>
+      <div class="result-box neutral"><div class="result-title">SM Application Dossier</div><div class="result-body"><strong>Protocol Amendment:</strong> Upload 'for publication' version first. Track-change material stays in 'not for publication'.<br><br><strong>Updated ICF:</strong> For publication for Cat. 3.<br><br><strong>IMPD/IB:</strong> Update and resubmit if IMP status changed.</div></div>
+      <div class="result-box red"><div class="result-title">SM RFI Deadlines</div><div class="result-body"><strong>Part I (by RMS):</strong> 12 days. Non-response = SM lapses.<br><strong>Part II (per MSC):</strong> 12 days per MSC RFI.</div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 15–16</span><span class="ref-chip">CTIS Sponsor Handbook (v6.2, March 2026)</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase3')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p3-safety">
+      <div class="breadcrumb"><span>Cat. 3</span><span class="sep">›</span><span>Safety Reporting</span></div><div class="outcome-header"><span class="outcome-badge">Safety Reporting</span></div>
+      <div class="result-box red"><div class="result-title">SUSARs → EudraVigilance ONLY</div><div class="result-body">Fatal/life-threatening: <strong>7-day deadline.</strong> All other: <strong>15 days.</strong> DO NOT submit via CTIS.</div></div>
+      <div class="result-box neutral"><div class="result-title">Annual Safety Report (ASR)</div><div class="result-body">Due annually. Via CTIS to RMS/MSC. NOT published.</div></div>
+      <div class="result-box amber"><div class="result-title">Urgent Safety Measure (USM)</div><div class="result-body">If immediate risk: notify the urgent safety measure in CTIS without delay. Then assess whether a consequential substantial modification is required.</div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 42</span><span class="ref-chip">EU CTR Art. 43</span><span class="ref-chip">EU CTR Art. 54</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase3')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+    <div class="tree-step" id="ctis-s2-p3-eot">
+      <div class="breadcrumb"><span>Cat. 3</span><span class="sep">›</span><span>End of Trial</span></div><div class="outcome-header"><span class="outcome-badge">End of Trial</span></div>
+      <div class="result-box neutral"><div class="result-title">EoT Notification</div><div class="result-body">Notify via CTIS within <strong>15 days</strong> of end of trial in the Member State(s) concerned.</div></div>
+      <div class="result-box green"><div class="result-title">Results Submission</div><div class="result-body"><strong>CSR</strong>: Deadline: within 30 days after the MA is granted, procedure is completed, or MAA is withdrawn.<br><br><strong>Summary of results + lay summary:</strong> Generally within 12 months; 6 months if paediatric.</div></div>
+      <div class="result-box red"><div class="result-title">Structured Data Check</div><div class="result-body">Confirm all CTIS structured data fields are free of personal data and CCI before submitting — cannot be redacted post-submission.</div></div>
+      <div class="ref-chips"><span class="ref-chip">EU CTR Art. 36</span><span class="ref-chip">EU CTR Art. 37(1)–(4)</span><span class="ref-chip">Revised CTIS Transparency Rules</span></div>
+      <div class="tree-nav"><button class="btn-back" onclick="ctisBack('s1-phase3')">← Back</button><button class="btn-reset" onclick="ctisReset()">↺ Start over</button></div>
+    </div>
+
+  </div></div>
+
+<script>
+  let ctisHistory = [];
+  function ctisGo(stepId) {
+    const current = document.querySelector('#ctis-tree-container .tree-step.active');
+    if (current) { ctisHistory.push(current.id.replace('ctis-', '')); current.classList.remove('active'); }
+    document.getElementById('ctis-' + stepId).classList.add('active');
+  }
+  function ctisBack(stepId) {
+    const current = document.querySelector('#ctis-tree-container .tree-step.active');
+    if (current) current.classList.remove('active');
+    document.getElementById('ctis-' + stepId).classList.add('active');
+  }
+  function ctisReset() {
+    document.querySelectorAll('#ctis-tree-container .tree-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('ctis-s0').classList.add('active');
+    ctisHistory = [];
+  }
+</script>
+</body>
+</html>
